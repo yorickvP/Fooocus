@@ -1,35 +1,35 @@
 # based on https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/v1.6.0/modules/ui_gradio_extensions.py
 
-import os
 import gradio as gr
 import args_manager
+from pathlib import Path
 
 from modules.localization import localization_js
 
 
 GradioTemplateResponseOriginal = gr.routes.templates.TemplateResponse
 
-modules_path = os.path.dirname(os.path.realpath(__file__))
-script_path = os.path.dirname(modules_path)
+script_path = Path(__file__).resolve().parent.parent
+js_path = script_path / "javascript"
 
 
 def webpath(fn):
-    if fn.startswith(script_path):
-        web_path = os.path.relpath(fn, script_path).replace('\\', '/')
+    if fn.is_relative_to(script_path):
+        web_path = str(fn.relative_to(script_path)).replace('\\', '/')
     else:
-        web_path = os.path.abspath(fn)
+        web_path = str(fn.absolute())
 
-    return f'file={web_path}?{os.path.getmtime(fn)}'
+    return f'file={web_path}?{fn.stat().st_mtime}'
 
 
 def javascript_html():
-    script_js_path = webpath('javascript/script.js')
-    context_menus_js_path = webpath('javascript/contextMenus.js')
-    localization_js_path = webpath('javascript/localization.js')
-    zoom_js_path = webpath('javascript/zoom.js')
-    edit_attention_js_path = webpath('javascript/edit-attention.js')
-    viewer_js_path = webpath('javascript/viewer.js')
-    image_viewer_js_path = webpath('javascript/imageviewer.js')
+    script_js_path = webpath(js_path / 'script.js')
+    context_menus_js_path = webpath(js_path / 'contextMenus.js')
+    localization_js_path = webpath(js_path / 'localization.js')
+    zoom_js_path = webpath(js_path / 'zoom.js')
+    edit_attention_js_path = webpath(js_path / 'edit-attention.js')
+    viewer_js_path = webpath(js_path / 'viewer.js')
+    image_viewer_js_path = webpath(js_path / 'imageviewer.js')
     head = f'<script type="text/javascript">{localization_js(args_manager.args.language)}</script>\n'
     head += f'<script type="text/javascript" src="{script_js_path}"></script>\n'
     head += f'<script type="text/javascript" src="{context_menus_js_path}"></script>\n'
@@ -42,7 +42,7 @@ def javascript_html():
 
 
 def css_html():
-    style_css_path = webpath('css/style.css')
+    style_css_path = webpath(script_path / 'css' / 'style.css')
     head = f'<link rel="stylesheet" property="stylesheet" href="{style_css_path}">'
     return head
 
